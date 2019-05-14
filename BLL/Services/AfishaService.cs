@@ -1,15 +1,20 @@
-﻿using NLayerApp.BLL.DTO;
-using NLayerApp.DAL.Repositories;
-using System.Collections.Generic;
-using NLayerApp.BLL.Interfaces;
+﻿using NLayerApp.DAL.Repositories;
+using NLayerApp.DAL.Interfaces;
 using NLayerApp.DAL.Entities;
+using NLayerApp.BLL.Interfaces;
+using NLayerApp.BLL.DTO;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NLayerApp.BLL.Services {
 	public class AfishaService :IAfishaService {
+		private IUnitOfWork uof = null;
+
+		public AfishaService() {
+			uof = new EFUnitOfWork();
+		}
 
 		public IEnumerable<PlayDTO> BookTicket(int ticketId) {
-			DAL.Interfaces.IUnitOfWork uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.TotalCount > ticket.BookedCount + ticket.BoughtCount) {
@@ -22,7 +27,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> BuyTicket(int ticketId) {
-			DAL.Interfaces.IUnitOfWork uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.TotalCount > ticket.BookedCount + ticket.BoughtCount) {
@@ -35,7 +39,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> GetAfishaPlays(string filterString) {
-			var uof = new EFUnitOfWork();
 			IEnumerable<Play> plays;
 			
 			if(filterString?.Length > 0) {
@@ -52,7 +55,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> MakeBookedAsBought(int ticketId) {
-			var uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.BoughtCount < ticket.TotalCount) {
@@ -66,7 +68,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public void UpdateAfishaPlays(IEnumerable<PlayDTO> playDTOs) {
-			var uof = new EFUnitOfWork();
 
 			foreach(var ticket in uof.Tickets.GetAll()) {
 				uof.Tickets.Delete(ticket.Id);
