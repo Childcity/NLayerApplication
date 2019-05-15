@@ -7,7 +7,6 @@ using NLayerApp.BLL.DTO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Data.Entity.Infrastructure;
 using System;
 
 namespace BLL_UnitTest {
@@ -17,7 +16,7 @@ namespace BLL_UnitTest {
 		private IUnitOfWork uof;
 		private IAfishaService afisha;
 
-		private int TestedTicketId = 196;
+		private int TestedTicketId = 236;
 
 		[TestInitialize]
 		public void TestInitialize() {
@@ -29,30 +28,26 @@ namespace BLL_UnitTest {
 		[TestMethod]
 		public void TestBookedTicketNormal() {
 			// retrieve current count of booked tickets
-			Ticket testedTicketBefore = uof.Tickets.Get(TestedTicketId);
+			Ticket testedTicket = uof.Tickets.Get(TestedTicketId);
+			int testedTicketBookedBefore = testedTicket.BookedCount;
 
 			// book a ticket by AfishaSvc
 			afisha.BookTicket(TestedTicketId);
 
-			// retrieve new count of booked tickets
-			Ticket testedTicketAfter = (uof = new EFUnitOfWork()).Tickets.Get(TestedTicketId);
-
-			Assert.AreEqual(testedTicketBefore.BookedCount + 1, testedTicketAfter.BookedCount,
+			Assert.AreEqual(testedTicketBookedBefore + 1, testedTicket.BookedCount,
 				$"(Old ticket count + 1) != (New ticket count)!");
 		}
 
 		[TestMethod]
 		public void TestBookedTicketOverflow() {
 			// retrieve current count of booked tickets
-			Ticket testedTicketBefore = uof.Tickets.Get(TestedTicketId + 1);
+			Ticket testedTicket = uof.Tickets.Get(TestedTicketId + 1);
+			int testedTicketBookedBefore = testedTicket.BookedCount;
 
 			// book the (Last + 1) ticket by AfishaSvc
 			afisha.BookTicket(TestedTicketId + 1);
 
-			// retrieve new count of booked tickets
-			Ticket testedTicketAfter = (uof = new EFUnitOfWork()).Tickets.Get(TestedTicketId + 1);
-
-			Assert.AreEqual(testedTicketBefore.BookedCount, testedTicketAfter.BookedCount,
+			Assert.AreEqual(testedTicketBookedBefore, testedTicket.BookedCount,
 				$"(Old ticket count) != (New ticket count) when there are no ticket left!");
 		}
 
@@ -60,14 +55,12 @@ namespace BLL_UnitTest {
 		public void TestBuyTicket() {
 			// retrieve current count of booked tickets
 			Ticket testedTicketBefore = uof.Tickets.Get(TestedTicketId);
+			int testedTicketBoughtBefore = testedTicketBefore.BoughtCount;
 
 			// buy a ticket by AfishaSvc
 			afisha.BuyTicket(TestedTicketId);
 
-			// retrieve new count of bought tickets
-			Ticket testedTicketAfter = (uof = new EFUnitOfWork()).Tickets.Get(TestedTicketId);
-
-			Assert.AreEqual(testedTicketBefore.BoughtCount + 1, testedTicketAfter.BoughtCount,
+			Assert.AreEqual(testedTicketBoughtBefore + 1, testedTicketBefore.BoughtCount,
 				$"(Old ticket count + 1) != (New ticket count)!");
 		}
 
@@ -75,15 +68,17 @@ namespace BLL_UnitTest {
 		public void TestAddNullGenrePlay() {
 			// get plays from afisha
 			var plays = afisha.GetAfishaPlays(null).ToList();
-
-			plays.Add(new PlayDTO {
+			
+			var newPlay = new PlayDTO {
 				Genre = null,
-				DateTime = System.DateTime.Now,
+				DateTime = DateTime.Now,
 				TicketDTOs = new List<TicketDTO>()
-			});
+			};
+
+			plays.Add(newPlay);
 
 			// save plays with null play inside
-			Assert.ThrowsException<DbUpdateException>(() => afisha.UpdateAfishaPlays(plays)
+			Assert.ThrowsException<ArgumentException>(() => afisha.UpdateAfishaPlays(plays)
 				, "Must be exception on inserting play with null Genre");
 		}
 
@@ -92,12 +87,14 @@ namespace BLL_UnitTest {
 			// get plays from afisha
 			var plays = afisha.GetAfishaPlays(null).ToList();
 
-			plays.Add(new PlayDTO {
+			var newPlay = new PlayDTO {
 				Author = null
-			});
+			};
+
+			plays.Add(newPlay);
 
 			// save plays with null play inside
-			Assert.ThrowsException<ArgumentNullException>(() => afisha.UpdateAfishaPlays(plays)
+			Assert.ThrowsException<ArgumentException>(() => afisha.UpdateAfishaPlays(plays)
 				, "Must be exception on inserting play with null Author");
 		}
 
@@ -106,7 +103,7 @@ namespace BLL_UnitTest {
 			// get plays from afisha
 			var plays = afisha.GetAfishaPlays(null).ToList();
 
-			var currentDayTime = System.DateTime.Now;
+			var currentDayTime = DateTime.Now;
 
 			plays.Add(new PlayDTO {
 				Name = "TEST_AAA",
