@@ -1,15 +1,20 @@
-﻿using NLayerApp.BLL.DTO;
-using NLayerApp.DAL.Repositories;
-using System.Collections.Generic;
-using NLayerApp.BLL.Interfaces;
+﻿using NLayerApp.DAL.Repositories;
+using NLayerApp.DAL.Interfaces;
 using NLayerApp.DAL.Entities;
+using NLayerApp.BLL.Interfaces;
+using NLayerApp.BLL.DTO;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NLayerApp.BLL.Services {
 	public class AfishaService :IAfishaService {
+		private IUnitOfWork uof = null;
+
+		public AfishaService() {
+			uof = new EFUnitOfWork();
+		}
 
 		public IEnumerable<PlayDTO> BookTicket(int ticketId) {
-			DAL.Interfaces.IUnitOfWork uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.TotalCount > ticket.BookedCount + ticket.BoughtCount) {
@@ -22,7 +27,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> BuyTicket(int ticketId) {
-			DAL.Interfaces.IUnitOfWork uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.TotalCount > ticket.BookedCount + ticket.BoughtCount) {
@@ -35,7 +39,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> GetAfishaPlays(string filterString) {
-			var uof = new EFUnitOfWork();
 			IEnumerable<Play> plays;
 			
 			if(filterString?.Length > 0) {
@@ -52,7 +55,6 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public IEnumerable<PlayDTO> MakeBookedAsBought(int ticketId) {
-			var uof = new EFUnitOfWork();
 			var ticket = uof.Tickets.GetAll().Single(x => x.Id == ticketId);
 
 			if(ticket.BoughtCount < ticket.TotalCount) {
@@ -66,7 +68,13 @@ namespace NLayerApp.BLL.Services {
 		}
 
 		public void UpdateAfishaPlays(IEnumerable<PlayDTO> playDTOs) {
-			var uof = new EFUnitOfWork();
+
+			foreach(var newPlay in PlaysDTOToPlays(playDTOs)) {
+				if(newPlay.Name == null || newPlay.Genre == null ||
+					newPlay.Author == null || newPlay.DateTime == null) {
+					throw new System.ArgumentException("Property can't be null");
+				}
+			}
 
 			foreach(var ticket in uof.Tickets.GetAll()) {
 				uof.Tickets.Delete(ticket.Id);
@@ -86,7 +94,7 @@ namespace NLayerApp.BLL.Services {
 			var playDTOs = new List<PlayDTO>();
 			plays.ToList().ForEach(play => {
 				var ticketDTOs = new List<TicketDTO>();
-				play.Tickets.ToList().ForEach(ticket => ticketDTOs.Add(new TicketDTO{
+				play.Tickets?.ToList().ForEach(ticket => ticketDTOs.Add(new TicketDTO{
 					Id = ticket.Id,
 					BookedCount = ticket.BookedCount,
 					BoughtCount = ticket.BoughtCount,
@@ -110,7 +118,7 @@ namespace NLayerApp.BLL.Services {
 			var plays = new List<Play>();
 			playDTOs.ToList().ForEach(play => {
 				var tickets = new List<Ticket>();
-				play.TicketDTOs.ToList().ForEach(ticket => tickets.Add(new Ticket {
+				play.TicketDTOs?.ToList().ForEach(ticket => tickets.Add(new Ticket {
 					Id = ticket.Id,
 					BookedCount = ticket.BookedCount,
 					BoughtCount = ticket.BoughtCount,
