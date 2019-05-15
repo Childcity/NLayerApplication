@@ -69,6 +69,13 @@ namespace NLayerApp.BLL.Services {
 
 		public void UpdateAfishaPlays(IEnumerable<PlayDTO> playDTOs) {
 
+			foreach(var newPlay in PlaysDTOToPlays(playDTOs)) {
+				if(newPlay.Name == null || newPlay.Genre == null ||
+					newPlay.Author == null || newPlay.DateTime == null) {
+					throw new System.ArgumentException("Property can't be null");
+				}
+			}
+
 			foreach(var ticket in uof.Tickets.GetAll()) {
 				uof.Tickets.Delete(ticket.Id);
 			}
@@ -87,7 +94,7 @@ namespace NLayerApp.BLL.Services {
 			var playDTOs = new List<PlayDTO>();
 			plays.ToList().ForEach(play => {
 				var ticketDTOs = new List<TicketDTO>();
-				play.Tickets.ToList().ForEach(ticket => ticketDTOs.Add(new TicketDTO{
+				play.Tickets?.ToList().ForEach(ticket => ticketDTOs.Add(new TicketDTO{
 					Id = ticket.Id,
 					BookedCount = ticket.BookedCount,
 					BoughtCount = ticket.BoughtCount,
@@ -111,7 +118,7 @@ namespace NLayerApp.BLL.Services {
 			var plays = new List<Play>();
 			playDTOs.ToList().ForEach(play => {
 				var tickets = new List<Ticket>();
-				play.TicketDTOs.ToList().ForEach(ticket => tickets.Add(new Ticket {
+				play.TicketDTOs?.ToList().ForEach(ticket => tickets.Add(new Ticket {
 					Id = ticket.Id,
 					BookedCount = ticket.BookedCount,
 					BoughtCount = ticket.BoughtCount,
