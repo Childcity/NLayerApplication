@@ -4,25 +4,29 @@ using NLayerApp.DAL.Entities;
 
 namespace NLayerApp.DAL.EF {
 	public class TheatreContext :DbContext {
+		public static string CreationDateTime = DateTime.Now.ToString();
+
 		public DbSet<Play> Plays { get; set; }
 		public DbSet<Ticket> Tickets { get; set; }
 
-		public TheatreContext(string connectionString)
-			: base(connectionString) {
+		private TheatreContext(string connectionString)
+			: base(connectionString) { }
+
+		private TheatreContext()
+			: this("DefaultConnection") {
+			Console.WriteLine($"Singleton ctor {DateTime.Now.TimeOfDay}");
 		}
 
-		public TheatreContext()
-			: this("DefaultConnection") { }
+		public static TheatreContext GetInstance() {
+			Console.WriteLine($"GetInstance {DateTime.Now.TimeOfDay}");
+			return Nested.instance;
+		}
 
-		//static TheatreContext() {
-		//	Database.SetInitializer(new StoreDbInitializer());
-		//}
+		// Lazy-Singleton realization
+		private class Nested {
+			static Nested() { }
+			internal static readonly TheatreContext instance = new TheatreContext();
+		}
 	}
 
-	//class StoreDbInitializer :CreateDatabaseIfNotExists<TheatreContext> {
-	//	protected override void Seed(TheatreContext db) {
-	//		db.Plays.Add(new Play { Name = "Natalka Poltavka", Author = "Mykola Lysenko", Genre = "Opera", DateTime = DateTime.Now });
-	//		db.SaveChanges();
-	//	}
-	//}
 }

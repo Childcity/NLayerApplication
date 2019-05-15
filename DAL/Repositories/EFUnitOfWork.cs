@@ -18,9 +18,7 @@ namespace NLayerApp.DAL.Repositories {
 			get => ticketRepository ?? (ticketRepository = new TicketRepository(db));
 		}
 
-		public EFUnitOfWork() => db = new TheatreContext();
-
-		public EFUnitOfWork(string connectionString) => db = new TheatreContext(connectionString);
+		public EFUnitOfWork() => db = TheatreContext.GetInstance();
 
 		public void Save() {
 			db.SaveChanges();
