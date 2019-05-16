@@ -1,6 +1,4 @@
-﻿using NLayerApp.DAL.Entities;
-using System.Configuration;
-using System.Data.Entity;
+﻿using System.Configuration;
 using System.Data.Common;
 using System.Data.SQLite;
 using System.Data;
@@ -9,9 +7,6 @@ using System.IO;
 namespace NLayerApp.DAL.EF {
 	public class TheatreContextSQLite :TheatreContext {
 		public static string dbPath = ConfigurationManager.AppSettings["DbPath"];
-
-		public DbSet<Play> Plays { get; set; }
-		public DbSet<Ticket> Tickets { get; set; }
 
 		private TheatreContextSQLite(string connectionString)
 			: base(connectionString) { }
