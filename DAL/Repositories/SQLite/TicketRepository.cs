@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace NLayerApp.DAL.Repositories.SQLite {
 	class TicketRepository :IRepository<Ticket> {
-		private TheatreContext db;
+		private TheatreContextSQLite db;
 
-		public TicketRepository(TheatreContext dbContext) {
+		public TicketRepository(TheatreContextSQLite dbContext) {
 			db = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			db.Tickets.Load();
 		}

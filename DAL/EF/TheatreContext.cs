@@ -1,32 +1,22 @@
-﻿using System;
-using System.Data.Entity;
-using NLayerApp.DAL.Entities;
+﻿using System.Data.Entity;
 
 namespace NLayerApp.DAL.EF {
-	public class TheatreContext :DbContext {
-		public static string CreationDateTime = DateTime.Now.ToString();
+	public abstract class TheatreContext :DbContext {
 
-		public DbSet<Play> Plays { get; set; }
-		public DbSet<Ticket> Tickets { get; set; }
-
-		private TheatreContext(string connectionString)
-			: base(connectionString) { }
-
-		private TheatreContext()
-			: this("DefaultConnection") {
-			Console.WriteLine($"Singleton ctor {DateTime.Now.TimeOfDay}");
+		public TheatreContext(string connectionString)
+			: base(connectionString) {
+			Initialize();
 		}
 
-		public static TheatreContext GetInstance() {
-			Console.WriteLine($"GetInstance {DateTime.Now.TimeOfDay}");
-			return Nested.instance;
+		// Template Method
+		public void Initialize() {
+			CreateDbIfNotExists();
+			CreateTablesIfNotExists();
 		}
 
-		// Lazy-Singleton realization
-		private class Nested {
-			static Nested() { }
-			internal static readonly TheatreContext instance = new TheatreContext();
-		}
+		protected abstract void CreateDbIfNotExists();
+
+		protected abstract void CreateTablesIfNotExists();
 	}
 
 }
