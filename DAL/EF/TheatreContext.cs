@@ -1,28 +1,26 @@
-﻿using System;
+﻿using NLayerApp.DAL.Entities;
 using System.Data.Entity;
-using NLayerApp.DAL.Entities;
 
 namespace NLayerApp.DAL.EF {
-	public class TheatreContext :DbContext {
+	public abstract class TheatreContext :DbContext {
+
 		public DbSet<Play> Plays { get; set; }
 		public DbSet<Ticket> Tickets { get; set; }
 
 		public TheatreContext(string connectionString)
 			: base(connectionString) {
+			Initialize();
 		}
 
-		public TheatreContext()
-			: this("DefaultConnection") { }
+		// Template Method
+		public void Initialize() {
+			CreateDbIfNotExists();
+			CreateTablesIfNotExists();
+		}
 
-		//static TheatreContext() {
-		//	Database.SetInitializer(new StoreDbInitializer());
-		//}
+		protected abstract void CreateDbIfNotExists();
+
+		protected abstract void CreateTablesIfNotExists();
 	}
 
-	//class StoreDbInitializer :CreateDatabaseIfNotExists<TheatreContext> {
-	//	protected override void Seed(TheatreContext db) {
-	//		db.Plays.Add(new Play { Name = "Natalka Poltavka", Author = "Mykola Lysenko", Genre = "Opera", DateTime = DateTime.Now });
-	//		db.SaveChanges();
-	//	}
-	//}
 }

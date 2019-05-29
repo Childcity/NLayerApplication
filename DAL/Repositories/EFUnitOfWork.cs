@@ -6,7 +6,7 @@ using NLayerApp.DAL.Repositories.SQLite;
 
 namespace NLayerApp.DAL.Repositories {
 	public class EFUnitOfWork :IUnitOfWork {
-		private TheatreContext db;
+		private TheatreContextSQLite db;
 		private PlayRepository playRepository;
 		private TicketRepository ticketRepository;
 
@@ -18,9 +18,7 @@ namespace NLayerApp.DAL.Repositories {
 			get => ticketRepository ?? (ticketRepository = new TicketRepository(db));
 		}
 
-		public EFUnitOfWork() => db = new TheatreContext();
-
-		public EFUnitOfWork(string connectionString) => db = new TheatreContext(connectionString);
+		public EFUnitOfWork() => db = TheatreContextSQLite.GetInstance();
 
 		public void Save() {
 			db.SaveChanges();

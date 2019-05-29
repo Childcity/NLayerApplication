@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace NLayerApp.FrontApp {
 	public partial class Form1 :Form {
-		IAfishaService afishaSVC = new AfishaService();
+		AfishaServiceAdapter afishaSVC = new AfishaServiceAdapter();
 
 		public Form1() {
 			InitializeComponent();
@@ -40,19 +40,19 @@ namespace NLayerApp.FrontApp {
 
 		private void button1_Click(object sender, EventArgs e) {
 			int selTicket = dataGridView2.CurrentCell.RowIndex;
-			var plays = afishaSVC.BuyTicket(int.Parse(dataGridView2[5, selTicket].Value.ToString()));
+			var plays = afishaSVC.OperateOnTicket(TicketOperation.Buy, int.Parse(dataGridView2[5, selTicket].Value.ToString()));
 			updateTickets(plays.ElementAt(dataGridView1.CurrentCell.RowIndex));
 		}
 
 		private void button2_Click(object sender, EventArgs e) {
 			int selTicket = dataGridView2.CurrentCell.RowIndex;
-			var plays = afishaSVC.BookTicket(int.Parse(dataGridView2[5, selTicket].Value.ToString()));
+			var plays = afishaSVC.OperateOnTicket(TicketOperation.Book, int.Parse(dataGridView2[5, selTicket].Value.ToString()));
 			updateTickets(plays.ElementAt(dataGridView1.CurrentCell.RowIndex));
 		}
 
 		private void button3_Click(object sender, EventArgs e) {
 			int selTicket = dataGridView2.CurrentCell.RowIndex;
-			var plays = afishaSVC.MakeBookedAsBought(int.Parse(dataGridView2[5, selTicket].Value.ToString()));
+			var plays = afishaSVC.OperateOnTicket(TicketOperation.MakeBookAsBought, int.Parse(dataGridView2[5, selTicket].Value.ToString()));
 			updateTickets(plays.ElementAt(dataGridView1.CurrentCell.RowIndex));
 		}
 
